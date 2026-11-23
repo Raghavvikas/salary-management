@@ -140,8 +140,12 @@ migrations and, if it finds an empty database, seeds it once. That matters becau
 Render's free tier has neither a shell nor a pre-deploy command, so a fresh
 deployment has to be able to bring itself up with data.
 
-`render.yaml` is a blueprint: point Render at this repository and it creates the web
-service and a managed Postgres together.
+`render.yaml` is a blueprint: point Render at this repository, give it a
+`DATABASE_URL` when it asks, and it builds and runs the service. The connection
+string stays out of the repository, and appending `?schema=salary` to it lets the
+application live in its own schema on a Postgres instance that is shared with
+something else — Prisma creates the schema on the first migration and touches
+nothing outside it.
 
 ```bash
 docker build -t salary-management .

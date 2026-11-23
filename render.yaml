@@ -1,31 +1,32 @@
-# Render blueprint: one Docker service that serves the API and the built UI, next to
-# a managed Postgres.
+# Render blueprint: one Docker service that serves the API and the built UI.
 #
-# The free tier has no shell and no pre-deploy command, so the container runs its own
-# migrations on boot and seeds the database the first time it finds it empty.
+# The free tier has no shell and no pre-deploy command, so the container applies its
+# own migrations on boot and seeds the database the first time it finds it empty.
+#
+# DATABASE_URL is `sync: false`, which means Render asks for it when the blueprint is
+# first applied rather than reading it from this file. Two reasons: a connection
+# string is a secret and does not belong in the repository, and a Render account is
+# limited to one free Postgres instance — so this deployment points at an existing
+# one and keeps its own tables in their own schema:
+#
+#   postgresql://user:password@host/database?schema=salary
+#
+# Prisma creates that schema on the first `migrate deploy`; nothing else in the
+# database is touched.
 services:
   - type: web
     name: salary-management
     runtime: docker
     plan: free
-    region: oregon
+    region: singapore
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: salary-management-db
-          property: connectionString
+        sync: false
       - key: PORT
         value: 4000
       - key: NODE_ENV
         value: production
       - key: SEED_ON_BOOT
         value: "true"
-
-databases:
-  - name: salary-management-db
-    databaseName: salary
-    user: salary
-    plan: free
-    region: oregon
