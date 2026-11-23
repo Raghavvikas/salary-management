@@ -5,6 +5,7 @@ import {
   CompensationError,
   costToBandMinimum,
   histogram,
+  localiseBand,
   percentile,
   salarySpread,
   type SalaryBand,
@@ -116,5 +117,23 @@ describe('histogram', () => {
 
   it('refuses a non positive bucket width', () => {
     expect(() => histogram([1], 0)).toThrow(CompensationError);
+  });
+});
+
+describe('localiseBand', () => {
+  it('scales the published band to the local market', () => {
+    expect(localiseBand(band, 0.34)).toEqual({
+      minUsd: 30_600_00,
+      midUsd: 37_400_00,
+      maxUsd: 44_200_00,
+    });
+  });
+
+  it('leaves the reference market untouched', () => {
+    expect(localiseBand(band, 1)).toEqual(band);
+  });
+
+  it('refuses a non positive index', () => {
+    expect(() => localiseBand(band, 0)).toThrow(CompensationError);
   });
 });

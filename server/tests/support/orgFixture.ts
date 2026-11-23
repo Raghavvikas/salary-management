@@ -15,8 +15,16 @@ export const DEPARTMENTS = {
 };
 
 export const COUNTRIES = {
-  us: { id: 1, code: 'US', name: 'United States', currency: 'USD', usdRate: 1 },
-  india: { id: 2, code: 'IN', name: 'India', currency: 'INR', usdRate: 0.012 },
+  us: { id: 1, code: 'US', name: 'United States', currency: 'USD', usdRate: 1, marketIndex: 1 },
+  india: {
+    id: 2,
+    code: 'IN',
+    name: 'India',
+    currency: 'INR',
+    usdRate: 0.012,
+    // Indian bands sit at 34% of the global USD band.
+    marketIndex: 0.34,
+  },
 };
 
 export const LEVELS = {
@@ -137,8 +145,8 @@ export const ORG: EmployeeRecord[] = [
     jobLevel: LEVELS.l2,
     gender: 'FEMALE',
     hireDate: '2022-01-10',
-    // 4,000,000 INR at 0.012 = 48,000 USD.
-    baseMajor: 4_000_000,
+    // 1,400,000 INR is 16,800 USD, just under the localised L2 minimum of 17,680.
+    baseMajor: 1_400_000,
     effectiveFrom: '2025-03-01',
   }),
   employee({
@@ -150,7 +158,8 @@ export const ORG: EmployeeRecord[] = [
     jobLevel: LEVELS.l3,
     gender: 'MALE',
     hireDate: '2020-11-20',
-    baseMajor: 7_000_000,
+    // 2,800,000 INR is 33,600 USD, in the upper half of the localised L3 band.
+    baseMajor: 2_800_000,
     effectiveFrom: '2025-02-01',
   }),
   employee({

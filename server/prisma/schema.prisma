@@ -22,6 +22,9 @@ model Country {
   currency  String     @db.VarChar(3)
   /// How many USD one unit of `currency` is worth. Seeded, not fetched live.
   usdRate   Decimal    @db.Decimal(14, 6)
+  /// Local market level against the global USD band. 1.0 is the US reference.
+  /// A level band is multiplied by this before anyone is compared against it.
+  marketIndex Decimal  @default(1.0) @db.Decimal(6, 3)
   employees Employee[]
 }
 

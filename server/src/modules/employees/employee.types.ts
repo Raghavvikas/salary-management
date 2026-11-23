@@ -18,6 +18,8 @@ export interface CountryRef extends DepartmentRef {
   currency: string;
   /** USD per one unit of `currency`, so the UI can explain any converted figure. */
   usdRate: number;
+  /** Local market level against the global USD band. 1.0 is the US reference. */
+  marketIndex: number;
 }
 
 export interface JobLevelRef extends DepartmentRef {
@@ -54,6 +56,8 @@ export interface EmployeeRecord {
 
 /** What the API returns: facts plus the numbers the domain layer works out. */
 export interface EmployeeSummary extends EmployeeRecord {
+  /** The level band after it has been localised to the employee's country. */
+  band: { minUsd: number; midUsd: number; maxUsd: number };
   compaRatio: number;
   bandPosition: BandPosition;
 }

@@ -13,12 +13,13 @@ export class PrismaReferenceRepository implements ReferenceRepository {
 
     return {
       departments: departments.map(({ id, code, name }) => ({ id, code, name })),
-      countries: countries.map(({ id, code, name, currency, usdRate }) => ({
+      countries: countries.map(({ id, code, name, currency, usdRate, marketIndex }) => ({
         id,
         code,
         name,
         currency,
         usdRate: Number(usdRate),
+        marketIndex: Number(marketIndex),
       })),
       jobLevels: jobLevels.map((level) => ({
         id: level.id,

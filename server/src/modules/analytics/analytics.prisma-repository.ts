@@ -30,11 +30,12 @@ export class PrismaAnalyticsRepository implements AnalyticsRepository {
         COALESCE(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY s."amountUsd"), 0) AS "p25Usd",
         COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY s."amountUsd"), 0) AS "medianUsd",
         COALESCE(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY s."amountUsd"), 0) AS "p75Usd",
-        COUNT(*) FILTER (WHERE s."amountUsd" < l."bandMinUsd")::int AS "belowBandCount",
-        COUNT(*) FILTER (WHERE s."amountUsd" > l."bandMaxUsd")::int AS "aboveBandCount",
-        COALESCE(SUM(GREATEST(l."bandMinUsd" - s."amountUsd", 0)), 0)::bigint AS "costToFixBelowBandUsd"
+        COUNT(*) FILTER (WHERE s."amountUsd" < l."bandMinUsd" * c."marketIndex")::int AS "belowBandCount",
+        COUNT(*) FILTER (WHERE s."amountUsd" > l."bandMaxUsd" * c."marketIndex")::int AS "aboveBandCount",
+        COALESCE(SUM(GREATEST(l."bandMinUsd" * c."marketIndex" - s."amountUsd", 0)), 0)::bigint AS "costToFixBelowBandUsd"
       FROM "Employee" e
       JOIN "JobLevel" l ON l.id = e."jobLevelId"
+      JOIN "Country" c ON c.id = e."countryId"
       JOIN "SalaryRecord" s ON s."employeeId" = e.id AND s."effectiveTo" IS NULL
       WHERE ${where(filters)}
     `);
@@ -78,10 +79,11 @@ export class PrismaAnalyticsRepository implements AnalyticsRepository {
         PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY s."amountUsd") AS "p25Usd",
         PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY s."amountUsd") AS "medianUsd",
         PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY s."amountUsd") AS "p75Usd",
-        AVG(s."amountUsd"::numeric / l."bandMidUsd") AS "averageCompaRatio"
+        AVG(s."amountUsd"::numeric / (l."bandMidUsd" * c."marketIndex")) AS "averageCompaRatio"
       FROM "Employee" e
       JOIN ${table} g ON g.id = ${foreignKey}
       JOIN "JobLevel" l ON l.id = e."jobLevelId"
+      JOIN "Country" c ON c.id = e."countryId"
       JOIN "SalaryRecord" s ON s."employeeId" = e.id AND s."effectiveTo" IS NULL
       WHERE ${where(filters)}
       GROUP BY g.id, g.code, g.name${dimension === 'jobLevel' ? Prisma.sql`, g.rank` : Prisma.empty}
@@ -110,6 +112,7 @@ export class PrismaAnalyticsRepository implements AnalyticsRepository {
         COUNT(*)::int AS count
       FROM "Employee" e
       JOIN "JobLevel" l ON l.id = e."jobLevelId"
+      JOIN "Country" c ON c.id = e."countryId"
       JOIN "SalaryRecord" s ON s."employeeId" = e.id AND s."effectiveTo" IS NULL
       WHERE ${where(filters)}
       GROUP BY 1
@@ -135,6 +138,7 @@ export class PrismaAnalyticsRepository implements AnalyticsRepository {
         PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY s."amountUsd") AS "medianUsd"
       FROM "Employee" e
       JOIN "JobLevel" l ON l.id = e."jobLevelId"
+      JOIN "Country" c ON c.id = e."countryId"
       JOIN "SalaryRecord" s ON s."employeeId" = e.id AND s."effectiveTo" IS NULL
       WHERE ${where(filters)}
       GROUP BY l.id, l.code, l.name, l.rank, e.gender

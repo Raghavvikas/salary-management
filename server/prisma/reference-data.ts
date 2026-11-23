@@ -14,7 +14,11 @@ export interface CountrySeed {
   usdRate: string;
   /** Share of headcount, relative to the other countries. */
   weight: number;
-  /** Local pay level against the USD band midpoint for the same job level. */
+  /**
+   * Local pay level against the USD band for the same job level, used both to
+   * generate salaries and, as `marketIndex`, to localise the band people are
+   * compared against.
+   */
   payFactor: number;
 }
 

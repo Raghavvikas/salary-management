@@ -1,4 +1,5 @@
-import { bandPosition, compaRatio, type SalaryBand } from '../../domain/compensation.js';
+import { bandPosition, compaRatio } from '../../domain/compensation.js';
+import { bandFor } from './band.js';
 import { convertToUsd, money } from '../../domain/money.js';
 import { validateSalaryChange } from '../../domain/salaryChange.js';
 import type { ChangeReason } from '../../domain/types.js';
@@ -98,14 +99,11 @@ export class EmployeeService {
 }
 
 function withDerivedFigures<T extends EmployeeRecord>(employee: T): T & EmployeeSummary {
-  const band: SalaryBand = {
-    minUsd: employee.jobLevel.bandMinUsd,
-    midUsd: employee.jobLevel.bandMidUsd,
-    maxUsd: employee.jobLevel.bandMaxUsd,
-  };
+  const band = bandFor(employee);
   const amountUsd = employee.currentSalary.amountUsd;
   return {
     ...employee,
+    band,
     compaRatio: compaRatio(amountUsd, band),
     bandPosition: bandPosition(amountUsd, band),
   };

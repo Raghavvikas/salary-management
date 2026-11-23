@@ -1,4 +1,5 @@
 import { costToBandMinimum, histogram, salarySpread } from '../../src/domain/compensation.js';
+import { bandFor } from '../../src/modules/employees/band.js';
 import { groupPayGapRows } from '../../src/modules/analytics/analytics.aggregation.js';
 import type {
   AnalyticsFilters,
@@ -47,19 +48,14 @@ export class InMemoryAnalyticsRepository implements AnalyticsRepository {
       medianUsd: spread.medianUsd,
       p75Usd: spread.p75Usd,
       belowBandCount: matches.filter(
-        (employee) => employee.currentSalary.amountUsd < employee.jobLevel.bandMinUsd,
+        (employee) => employee.currentSalary.amountUsd < bandFor(employee).minUsd,
       ).length,
       aboveBandCount: matches.filter(
-        (employee) => employee.currentSalary.amountUsd > employee.jobLevel.bandMaxUsd,
+        (employee) => employee.currentSalary.amountUsd > bandFor(employee).maxUsd,
       ).length,
       costToFixBelowBandUsd: matches.reduce(
         (total, employee) =>
-          total +
-          costToBandMinimum(employee.currentSalary.amountUsd, {
-            minUsd: employee.jobLevel.bandMinUsd,
-            midUsd: employee.jobLevel.bandMidUsd,
-            maxUsd: employee.jobLevel.bandMaxUsd,
-          }),
+          total + costToBandMinimum(employee.currentSalary.amountUsd, bandFor(employee)),
         0,
       ),
     };
@@ -80,8 +76,7 @@ export class InMemoryAnalyticsRepository implements AnalyticsRepository {
       const key = first[dimension];
       const spread = salarySpread(members.map((member) => member.currentSalary.amountUsd));
       const compaSum = members.reduce(
-        (total, member) =>
-          total + member.currentSalary.amountUsd / member.jobLevel.bandMidUsd,
+        (total, member) => total + member.currentSalary.amountUsd / bandFor(member).midUsd,
         0,
       );
       return {

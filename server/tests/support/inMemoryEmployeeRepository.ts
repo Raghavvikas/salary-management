@@ -1,4 +1,5 @@
 import { bandPosition } from '../../src/domain/compensation.js';
+import { bandFor } from '../../src/modules/employees/band.js';
 import type {
   EmployeeQuery,
   EmployeeRecord,
@@ -116,11 +117,7 @@ export class InMemoryEmployeeRepository implements EmployeeRepository {
       return false;
     }
     if (query.bandPositions?.length) {
-      const position = bandPosition(employee.currentSalary.amountUsd, {
-        minUsd: employee.jobLevel.bandMinUsd,
-        midUsd: employee.jobLevel.bandMidUsd,
-        maxUsd: employee.jobLevel.bandMaxUsd,
-      });
+      const position = bandPosition(employee.currentSalary.amountUsd, bandFor(employee));
       if (!query.bandPositions.includes(position)) return false;
     }
     return true;
@@ -138,7 +135,7 @@ function comparator(query: EmployeeQuery): (a: EmployeeRecord, b: EmployeeRecord
       case 'salaryUsd':
         return employee.currentSalary.amountUsd;
       case 'compaRatio':
-        return employee.currentSalary.amountUsd / employee.jobLevel.bandMidUsd;
+        return employee.currentSalary.amountUsd / bandFor(employee).midUsd;
       case 'hireDate':
         return employee.hireDate;
     }

@@ -72,13 +72,14 @@ describe('GET /api/employees', () => {
       .query({ sortBy: 'salaryUsd', sortDirection: 'desc' })
       .expect(200);
 
-    // Rohan earns 7,000,000 INR, which is 84,000 USD, not the largest number.
+    // Rohan's 2,800,000 INR is the largest number in the org and the second
+    // smallest salary once it is converted.
     expect(names(response.body)).toEqual([
       'Byron',
       'Turing',
-      'Mehta',
       'Hopper',
       'Weber',
+      'Mehta',
       'Sharma',
     ]);
   });

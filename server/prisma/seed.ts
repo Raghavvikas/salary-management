@@ -77,11 +77,12 @@ async function resetTables(): Promise<void> {
 
 async function seedReferenceData() {
   await prisma.country.createMany({
-    data: COUNTRIES.map(({ code, name, currency, usdRate }) => ({
+    data: COUNTRIES.map(({ code, name, currency, usdRate, payFactor }) => ({
       code,
       name,
       currency,
       usdRate,
+      marketIndex: payFactor.toFixed(3),
     })),
   });
   await prisma.department.createMany({

@@ -14,6 +14,24 @@ export interface SalaryBand {
   readonly maxUsd: number;
 }
 
+/**
+ * A level's band is published in USD for the whole company. Pay levels differ by
+ * country, so before anyone is compared against their band it is scaled by the
+ * market index of the country they are paid in. Without this, two thirds of a
+ * globally distributed org reads as "below band", which tells the HR manager
+ * nothing.
+ */
+export function localiseBand(band: SalaryBand, marketIndex: number): SalaryBand {
+  if (!Number.isFinite(marketIndex) || marketIndex <= 0) {
+    throw new CompensationError(`market index must be positive, got ${marketIndex}`);
+  }
+  return {
+    minUsd: Math.round(band.minUsd * marketIndex),
+    midUsd: Math.round(band.midUsd * marketIndex),
+    maxUsd: Math.round(band.maxUsd * marketIndex),
+  };
+}
+
 export type BandPosition = 'BELOW_BAND' | 'LOWER_HALF' | 'UPPER_HALF' | 'ABOVE_BAND';
 
 export class CompensationError extends Error {}

@@ -54,7 +54,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
         e.id, e."employeeCode", e."firstName", e."lastName", e.email, e.gender::text AS gender,
         e."jobTitle", e."hireDate", e.status::text AS status,
         d.id AS "departmentId", d.code AS "departmentCode", d.name AS "departmentName",
-        c.id AS "countryId", c.code AS "countryCode", c.name AS "countryName", c.currency, c."usdRate",
+        c.id AS "countryId", c.code AS "countryCode", c.name AS "countryName", c.currency, c."usdRate", c."marketIndex",
         l.id AS "jobLevelId", l.code AS "jobLevelCode", l.name AS "jobLevelName", l.rank,
         l."bandMinUsd", l."bandMidUsd", l."bandMaxUsd",
         s."baseAmount", s."amountUsd", s."effectiveFrom", s."changeReason"::text AS "changeReason",
@@ -124,6 +124,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
         name: employee.country.name,
         currency: employee.country.currency,
         usdRate: Number(employee.country.usdRate),
+        marketIndex: Number(employee.country.marketIndex),
       },
       jobLevel: {
         id: employee.jobLevel.id,
@@ -197,6 +198,7 @@ interface DirectoryRow {
   countryName: string;
   currency: string;
   usdRate: Prisma.Decimal;
+  marketIndex: Prisma.Decimal;
   jobLevelId: number;
   jobLevelCode: string;
   jobLevelName: string;
@@ -229,6 +231,7 @@ function toEmployeeRecord(row: DirectoryRow): EmployeeRecord {
       name: row.countryName,
       currency: row.currency,
       usdRate: Number(row.usdRate),
+      marketIndex: Number(row.marketIndex),
     },
     jobLevel: {
       id: row.jobLevelId,
@@ -303,13 +306,13 @@ function pushIdFilter(conditions: Prisma.Sql[], column: Prisma.Sql, ids?: number
 function bandCondition(position: BandPosition): Prisma.Sql {
   switch (position) {
     case 'BELOW_BAND':
-      return Prisma.sql`s."amountUsd" < l."bandMinUsd"`;
+      return Prisma.sql`s."amountUsd" < l."bandMinUsd" * c."marketIndex"`;
     case 'ABOVE_BAND':
-      return Prisma.sql`s."amountUsd" > l."bandMaxUsd"`;
+      return Prisma.sql`s."amountUsd" > l."bandMaxUsd" * c."marketIndex"`;
     case 'LOWER_HALF':
-      return Prisma.sql`s."amountUsd" >= l."bandMinUsd" AND s."amountUsd" <= l."bandMidUsd"`;
+      return Prisma.sql`s."amountUsd" >= l."bandMinUsd" * c."marketIndex" AND s."amountUsd" <= l."bandMidUsd" * c."marketIndex"`;
     case 'UPPER_HALF':
-      return Prisma.sql`s."amountUsd" > l."bandMidUsd" AND s."amountUsd" <= l."bandMaxUsd"`;
+      return Prisma.sql`s."amountUsd" > l."bandMidUsd" * c."marketIndex" AND s."amountUsd" <= l."bandMaxUsd" * c."marketIndex"`;
   }
 }
 
@@ -323,7 +326,7 @@ function orderBy(query: EmployeeQuery): Prisma.Sql {
     name: 'e."lastName", e."firstName"',
     employeeCode: 'e."employeeCode"',
     salaryUsd: 's."amountUsd"',
-    compaRatio: 's."amountUsd"::numeric / l."bandMidUsd"',
+    compaRatio: 's."amountUsd"::numeric / (l."bandMidUsd" * c."marketIndex")',
     hireDate: 'e."hireDate"',
   }[query.sortBy];
   // `e.id` is appended so that pages never repeat or skip a row on ties.

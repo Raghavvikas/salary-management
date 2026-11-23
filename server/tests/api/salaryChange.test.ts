@@ -51,12 +51,18 @@ describe('POST /api/employees/:id/salary', () => {
   it('converts a local currency raise to USD using the country rate', async () => {
     const response = await request(app)
       .post('/api/employees/4/salary')
-      .send({ ...validRaise, baseAmountMajor: 5_000_000, currency: 'INR' })
+      .send({ ...validRaise, baseAmountMajor: 1_600_000, currency: 'INR' })
       .expect(201);
 
-    // 5,000,000 INR at 0.012 is 60,000 USD.
-    expect(response.body.currentSalary.amountUsd).toBe(60_000_00);
-    expect(response.body.compaRatio).toBe(0.938);
+    // 1,600,000 INR at 0.012 is 19,200 USD, against a localised L2 midpoint of
+    // 21,760 USD.
+    expect(response.body.currentSalary.amountUsd).toBe(19_200_00);
+    expect(response.body.compaRatio).toBe(0.882);
+    expect(response.body.band).toEqual({
+      minUsd: 17_680_00,
+      midUsd: 21_760_00,
+      maxUsd: 26_520_00,
+    });
   });
 
   it('refuses a salary in the wrong currency', async () => {
