@@ -202,21 +202,29 @@ function buildSalaryHistory(
   const raiseCount = Math.min(Math.floor(tenureYears), 5);
 
   const records: Prisma.SalaryRecordCreateManyInput[] = [];
-  let amountMinor = startingAmountMinor;
-  let effectiveFrom = hireDate;
   let reason: ChangeReason = 'HIRE';
 
   for (let step = 0; step <= raiseCount; step += 1) {
     const isLast = step === raiseCount;
-    const nextAmount = isLast
+    // Geometric interpolation between the starting and the current salary, so the
+    // last record is exactly today's pay and every step in between is plausible.
+    const amountMinor = isLast
       ? currentAmountMinor
       : roundHalfUp(
           startingAmountMinor *
-            Math.pow(currentAmountMinor / startingAmountMinor, (step + 1) / (raiseCount + 1)),
+            Math.pow(currentAmountMinor / startingAmountMinor, step / raiseCount),
         );
-    const nextEffectiveFrom = dateOnly(
-      addDays(hireDate, Math.floor(((step + 1) / (raiseCount + 1)) * tenureYears * 365)),
+    const effectiveFrom = dateOnly(
+      addDays(hireDate, Math.floor((step / (raiseCount + 1)) * tenureYears * 365)),
     );
+    const effectiveTo = isLast
+      ? null
+      : dateOnly(
+          addDays(
+            hireDate,
+            Math.floor(((step + 1) / (raiseCount + 1)) * tenureYears * 365) - 1,
+          ),
+        );
 
     const local = money(amountMinor, currency);
     records.push({
@@ -226,14 +234,11 @@ function buildSalaryHistory(
       amountUsd: BigInt(convertToUsd(local, usdRate).amountMinor),
       usdRate: usdRate.toFixed(6),
       effectiveFrom,
-      effectiveTo: isLast ? null : nextEffectiveFrom,
+      effectiveTo,
       changeReason: reason,
       note: null,
     });
 
-    if (isLast) break;
-    amountMinor = nextAmount;
-    effectiveFrom = nextEffectiveFrom;
     reason = random() < 0.2 ? 'PROMOTION' : random() < 0.15 ? 'MARKET_ADJUSTMENT' : 'MERIT_INCREASE';
   }
 
