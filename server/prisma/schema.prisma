@@ -1,0 +1,128 @@
+// Salary management data model.
+//
+// Two rules drive the shape of this schema:
+//   1. A salary is a fact with a validity period, so it lives in its own table and
+//      is never updated in place. `effectiveTo = null` is the current record.
+//   2. Money is stored in minor units (integers) in the local currency, plus a USD
+//      snapshot taken with the FX rate that was in force when the record was written.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Country {
+  id        Int        @id @default(autoincrement())
+  code      String     @unique @db.VarChar(2)
+  name      String
+  currency  String     @db.VarChar(3)
+  /// How many USD one unit of `currency` is worth. Seeded, not fetched live.
+  usdRate   Decimal    @db.Decimal(14, 6)
+  employees Employee[]
+}
+
+model Department {
+  id        Int        @id @default(autoincrement())
+  code      String     @unique
+  name      String
+  employees Employee[]
+}
+
+model JobLevel {
+  id         Int        @id @default(autoincrement())
+  code       String     @unique
+  name       String
+  /// 1 = most junior. Used for ordering, never for maths.
+  rank       Int
+  bandMinUsd BigInt
+  bandMidUsd BigInt
+  bandMaxUsd BigInt
+  employees  Employee[]
+
+  @@index([rank])
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+  UNDISCLOSED
+}
+
+model Employee {
+  id           Int            @id @default(autoincrement())
+  employeeCode String         @unique
+  firstName    String
+  lastName     String
+  email        String         @unique
+  gender       Gender         @default(UNDISCLOSED)
+  jobTitle     String
+  hireDate     DateTime       @db.Date
+  status       EmployeeStatus @default(ACTIVE)
+
+  departmentId Int
+  countryId    Int
+  jobLevelId   Int
+  managerId    Int?
+
+  department Department @relation(fields: [departmentId], references: [id])
+  country    Country    @relation(fields: [countryId], references: [id])
+  jobLevel   JobLevel   @relation(fields: [jobLevelId], references: [id])
+  manager    Employee?  @relation("Reports", fields: [managerId], references: [id])
+  reports    Employee[] @relation("Reports")
+
+  salaryRecords SalaryRecord[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([departmentId])
+  @@index([countryId])
+  @@index([jobLevelId])
+  @@index([status])
+  @@index([lastName])
+}
+
+enum ChangeReason {
+  HIRE
+  MERIT_INCREASE
+  PROMOTION
+  MARKET_ADJUSTMENT
+  CORRECTION
+  ROLE_CHANGE
+}
+
+model SalaryRecord {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  /// Annual base pay in the minor units of `currency` (e.g. cents).
+  baseAmount BigInt
+  currency   String  @db.VarChar(3)
+  /// Same amount converted to USD minor units using the rate at write time.
+  amountUsd  BigInt
+  /// Rate used for `amountUsd`, kept so the conversion can always be explained.
+  usdRate    Decimal @db.Decimal(14, 6)
+
+  effectiveFrom DateTime  @db.Date
+  /// Null means "current". Closing a record is how a change is recorded.
+  effectiveTo   DateTime? @db.Date
+
+  changeReason ChangeReason
+  note         String?
+  createdAt    DateTime     @default(now())
+
+  @@index([employeeId, effectiveTo])
+  @@index([effectiveFrom])
+}
