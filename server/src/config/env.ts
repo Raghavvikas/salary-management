@@ -6,6 +6,8 @@ const schema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   DATABASE_URL: z.string().min(1),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
+  /** Built UI to serve alongside the API. Empty in development, where Vite serves it. */
+  WEB_DIST: z.string().optional(),
 });
 
 /**

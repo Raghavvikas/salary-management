@@ -1,5 +1,7 @@
 import cors from 'cors';
 import express, { type Express } from 'express';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import { env } from '../config/env.js';
 import { analyticsRoutes } from '../modules/analytics/analytics.routes.js';
 import type { AnalyticsRepository } from '../modules/analytics/analytics.types.js';
@@ -36,6 +38,20 @@ export function createApp(dependencies: AppDependencies): Express {
   app.use('/api/employees', employeeRoutes(dependencies.employeeService));
   app.use('/api/analytics', analyticsRoutes(dependencies.analyticsRepository));
   app.use('/api/reference', referenceRoutes(dependencies.referenceRepository));
+
+  app.use('/api', (request) => {
+    throw new HttpError(404, 'NOT_FOUND', `No route matches ${request.method} ${request.path}.`);
+  });
+
+  // In production the API also serves the built UI, so the whole thing is one
+  // origin and one process: no CORS, no second deployment, no base URL to set.
+  if (env.WEB_DIST && existsSync(env.WEB_DIST)) {
+    const distDir = path.resolve(env.WEB_DIST);
+    app.use(express.static(distDir));
+    app.get('*', (_request, response) => {
+      response.sendFile(path.join(distDir, 'index.html'));
+    });
+  }
 
   app.use((request) => {
     throw new HttpError(404, 'NOT_FOUND', `No route matches ${request.method} ${request.path}.`);

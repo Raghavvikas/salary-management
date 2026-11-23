@@ -78,18 +78,35 @@ export const JOB_LEVELS: JobLevelSeed[] = [
   { code: 'L7', name: 'Vice President', rank: 7, bandMinUsd: 220_000, bandMidUsd: 285_000, bandMaxUsd: 360_000, weight: 1 },
 ];
 
+/**
+ * Name pools. 96 x 72 combinations keeps duplicate names in a 10,000 person org
+ * down to roughly one per name, which is what a real directory looks like.
+ * Names are not tied to the generated gender; neither are real ones, reliably.
+ */
 export const FIRST_NAMES = [
   'Aarav', 'Priya', 'Rohan', 'Ananya', 'Vikram', 'Neha', 'Arjun', 'Meera',
+  'Kabir', 'Isha', 'Aditya', 'Divya', 'Nikhil', 'Pooja', 'Siddharth', 'Riya',
   'James', 'Emily', 'Michael', 'Sarah', 'David', 'Laura', 'Daniel', 'Hannah',
-  'Lukas', 'Anna', 'Jonas', 'Lena', 'Piotr', 'Zofia', 'Mateusz', 'Julia',
-  'Lucas', 'Camila', 'Mateo', 'Valentina', 'Wei', 'Mei', 'Hao', 'Siti',
+  'Robert', 'Megan', 'Thomas', 'Rachel', 'Andrew', 'Chloe', 'Joshua', 'Grace',
+  'Lukas', 'Anna', 'Jonas', 'Lena', 'Felix', 'Marie', 'Tobias', 'Clara',
+  'Piotr', 'Zofia', 'Mateusz', 'Julia', 'Jakub', 'Maja', 'Tomasz', 'Hanna',
+  'Lucas', 'Camila', 'Mateo', 'Valentina', 'Gabriel', 'Beatriz', 'Rafael', 'Larissa',
+  'Diego', 'Ximena', 'Santiago', 'Lucia', 'Andres', 'Carmen', 'Javier', 'Elena',
+  'Wei', 'Mei', 'Hao', 'Siti', 'Jun', 'Ling', 'Arif', 'Nadia',
   'Oliver', 'Charlotte', 'Noah', 'Amelia', 'Ethan', 'Isabella', 'Liam', 'Sofia',
+  'Mason', 'Ava', 'Jack', 'Freya', 'Harry', 'Ruby', 'George', 'Erin',
+  'Yusuf', 'Zara', 'Omar', 'Layla', 'Idris', 'Amina', 'Samuel', 'Nour',
 ];
 
 export const LAST_NAMES = [
   'Sharma', 'Patel', 'Iyer', 'Reddy', 'Nair', 'Gupta', 'Mehta', 'Bose',
+  'Chopra', 'Desai', 'Kulkarni', 'Banerjee', 'Rao', 'Malhotra', 'Pillai', 'Joshi',
   'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis',
-  'Muller', 'Schmidt', 'Fischer', 'Weber', 'Kowalski', 'Nowak', 'Wojcik',
-  'Silva', 'Santos', 'Oliveira', 'Rodriguez', 'Hernandez', 'Lopez',
-  'Tan', 'Lim', 'Ng', 'Chen', 'Wong', 'Murphy', 'OBrien', 'Taylor', 'Wilson',
+  'Clark', 'Walker', 'Hall', 'Young', 'King', 'Wright', 'Scott', 'Green',
+  'Muller', 'Schmidt', 'Fischer', 'Weber', 'Wagner', 'Becker', 'Hoffmann', 'Schulz',
+  'Kowalski', 'Nowak', 'Wojcik', 'Lewandowski', 'Zielinski', 'Szymanski',
+  'Silva', 'Santos', 'Oliveira', 'Souza', 'Pereira', 'Costa',
+  'Rodriguez', 'Hernandez', 'Lopez', 'Martinez', 'Gonzalez', 'Ramirez',
+  'Tan', 'Lim', 'Ng', 'Chen', 'Wong', 'Rahman',
+  'Murphy', 'OBrien', 'Taylor', 'Wilson', 'Kelly', 'Doherty',
 ];

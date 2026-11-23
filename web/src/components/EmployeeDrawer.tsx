@@ -54,7 +54,7 @@ export function EmployeeDrawer({
         <Skeleton active paragraph={{ rows: 8 }} />
       ) : (
         <>
-          <Space size="large" wrap style={{ marginBottom: 16 }}>
+          <Space size="large" wrap style={{ marginBottom: 16, display: 'flex' }}>
             <Statistic
               title="Annual base"
               value={formatMoney(employee.currentSalary.baseAmount, employee.currentSalary.currency)}
@@ -65,7 +65,7 @@ export function EmployeeDrawer({
             <Statistic title="Compa-ratio" value={employee.compaRatio.toFixed(2)} />
           </Space>
 
-          <Space wrap style={{ marginBottom: 16 }}>
+          <Space wrap style={{ marginBottom: 16, display: 'flex' }}>
             <BandPositionTag
               position={employee.bandPosition}
               band={employee.band}
