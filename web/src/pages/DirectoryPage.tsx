@@ -161,6 +161,9 @@ export function DirectoryPage() {
           onChange={handleTableChange}
           rowClassName="table-row-clickable"
           onRow={(employee) => ({ onClick: () => setSelectedId(employee.id) })}
+          // The table scrolls inside its own card rather than widening the page,
+          // which is what was pushing the drawer out of view on narrow windows.
+          scroll={{ x: 'max-content' }}
           pagination={{
             current: data?.page ?? page,
             pageSize: PAGE_SIZE,

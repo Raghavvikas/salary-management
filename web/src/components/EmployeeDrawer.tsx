@@ -34,7 +34,9 @@ export function EmployeeDrawer({
 
   return (
     <Drawer
-      width={560}
+      // Fixed pixels push the header actions off screen on a laptop with the
+      // window split; never wider than the viewport.
+      width="min(560px, 100vw)"
       open={employeeId !== null}
       onClose={() => {
         setEditing(false);
