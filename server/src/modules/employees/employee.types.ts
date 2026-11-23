@@ -16,6 +16,8 @@ export interface DepartmentRef {
 
 export interface CountryRef extends DepartmentRef {
   currency: string;
+  /** USD per one unit of `currency`, so the UI can explain any converted figure. */
+  usdRate: number;
 }
 
 export interface JobLevelRef extends DepartmentRef {

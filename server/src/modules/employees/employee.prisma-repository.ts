@@ -54,7 +54,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
         e.id, e."employeeCode", e."firstName", e."lastName", e.email, e.gender::text AS gender,
         e."jobTitle", e."hireDate", e.status::text AS status,
         d.id AS "departmentId", d.code AS "departmentCode", d.name AS "departmentName",
-        c.id AS "countryId", c.code AS "countryCode", c.name AS "countryName", c.currency,
+        c.id AS "countryId", c.code AS "countryCode", c.name AS "countryName", c.currency, c."usdRate",
         l.id AS "jobLevelId", l.code AS "jobLevelCode", l.name AS "jobLevelName", l.rank,
         l."bandMinUsd", l."bandMidUsd", l."bandMaxUsd",
         s."baseAmount", s."amountUsd", s."effectiveFrom", s."changeReason"::text AS "changeReason",
@@ -123,6 +123,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
         code: employee.country.code,
         name: employee.country.name,
         currency: employee.country.currency,
+        usdRate: Number(employee.country.usdRate),
       },
       jobLevel: {
         id: employee.jobLevel.id,
@@ -195,6 +196,7 @@ interface DirectoryRow {
   countryCode: string;
   countryName: string;
   currency: string;
+  usdRate: Prisma.Decimal;
   jobLevelId: number;
   jobLevelCode: string;
   jobLevelName: string;
@@ -226,6 +228,7 @@ function toEmployeeRecord(row: DirectoryRow): EmployeeRecord {
       code: row.countryCode,
       name: row.countryName,
       currency: row.currency,
+      usdRate: Number(row.usdRate),
     },
     jobLevel: {
       id: row.jobLevelId,
