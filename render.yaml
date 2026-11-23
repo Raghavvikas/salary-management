@@ -1,10 +1,14 @@
-# One-click deploy on Render: a managed Postgres plus the single image that serves
-# the API and the built UI. The seed is run once from the service shell:
-#   npx prisma db seed --schema server/prisma/schema.prisma
+# Render blueprint: one Docker service that serves the API and the built UI, next to
+# a managed Postgres.
+#
+# The free tier has no shell and no pre-deploy command, so the container runs its own
+# migrations on boot and seeds the database the first time it finds it empty.
 services:
   - type: web
     name: salary-management
     runtime: docker
+    plan: free
+    region: oregon
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     envVars:
@@ -14,8 +18,14 @@ services:
           property: connectionString
       - key: PORT
         value: 4000
+      - key: NODE_ENV
+        value: production
+      - key: SEED_ON_BOOT
+        value: "true"
 
 databases:
   - name: salary-management-db
     databaseName: salary
     user: salary
+    plan: free
+    region: oregon

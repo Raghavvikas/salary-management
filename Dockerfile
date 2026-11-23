@@ -25,5 +25,6 @@ COPY --from=build /app/server/prisma ./server/prisma
 COPY --from=build /app/web/dist ./web/dist
 
 EXPOSE 4000
-# Migrations run on boot: the schema a release needs ships with that release.
-CMD ["sh", "-c", "npx prisma migrate deploy --schema server/prisma/schema.prisma && node server/dist/src/main.js"]
+# Migrations run on boot: the schema a release needs ships with that release. A
+# brand new database is then seeded once, so a fresh deployment comes up with data.
+CMD ["sh", "-c", "npx prisma migrate deploy --schema server/prisma/schema.prisma && node server/dist/prisma/ensure-seeded.js && node server/dist/src/main.js"]

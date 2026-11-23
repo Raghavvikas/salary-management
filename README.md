@@ -134,11 +134,20 @@ curl -X POST http://localhost:4000/api/employees/42/salary \
 
 ## Deployment
 
-The `Dockerfile` builds one image that runs the migrations on boot and serves the API
-and the UI on a single port — no CORS, no second deployment, no base URL to configure.
-`render.yaml` deploys that image next to a managed Postgres.
+The `Dockerfile` builds one image that serves the API and the UI on a single port —
+no CORS, no second deployment, no base URL to configure. On boot it applies the
+migrations and, if it finds an empty database, seeds it once. That matters because
+Render's free tier has neither a shell nor a pre-deploy command, so a fresh
+deployment has to be able to bring itself up with data.
+
+`render.yaml` is a blueprint: point Render at this repository and it creates the web
+service and a managed Postgres together.
 
 ```bash
 docker build -t salary-management .
 docker run -p 4000:4000 -e DATABASE_URL=postgresql://... salary-management
 ```
+
+Two things to know about the free tier: the service sleeps after 15 minutes of
+inactivity and takes about a minute to wake, and a free Postgres instance expires
+after 30 days.
