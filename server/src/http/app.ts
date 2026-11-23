@@ -1,6 +1,8 @@
 import cors from 'cors';
 import express, { type Express } from 'express';
 import { env } from '../config/env.js';
+import { analyticsRoutes } from '../modules/analytics/analytics.routes.js';
+import type { AnalyticsRepository } from '../modules/analytics/analytics.types.js';
 import { employeeRoutes } from '../modules/employees/employee.routes.js';
 import type { EmployeeService } from '../modules/employees/employee.service.js';
 import { referenceRoutes } from '../modules/reference/reference.routes.js';
@@ -17,6 +19,7 @@ import { errorHandler, HttpError } from './errors.js';
  */
 export interface AppDependencies {
   employeeService: EmployeeService;
+  analyticsRepository: AnalyticsRepository;
   referenceRepository: ReferenceRepository;
 }
 
@@ -31,6 +34,7 @@ export function createApp(dependencies: AppDependencies): Express {
   });
 
   app.use('/api/employees', employeeRoutes(dependencies.employeeService));
+  app.use('/api/analytics', analyticsRoutes(dependencies.analyticsRepository));
   app.use('/api/reference', referenceRoutes(dependencies.referenceRepository));
 
   app.use((request) => {

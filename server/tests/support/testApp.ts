@@ -3,6 +3,7 @@ import { EmployeeService } from '../../src/modules/employees/employee.service.js
 import type { EmployeeRecord } from '../../src/modules/employees/employee.types.js';
 import type { ReferenceData } from '../../src/modules/reference/reference.types.js';
 import { COUNTRIES, DEPARTMENTS, LEVELS } from './orgFixture.js';
+import { InMemoryAnalyticsRepository } from './inMemoryAnalyticsRepository.js';
 import { InMemoryEmployeeRepository } from './inMemoryEmployeeRepository.js';
 
 /** Fixed "today" so date rules in the tests never depend on when they are run. */
@@ -18,6 +19,7 @@ export function buildTestApp(employees?: EmployeeRecord[]) {
   const repository = new InMemoryEmployeeRepository(employees);
   const app = createApp({
     employeeService: new EmployeeService(repository, () => TEST_TODAY),
+    analyticsRepository: new InMemoryAnalyticsRepository(employees),
     referenceRepository: { all: async () => referenceData },
   });
   return { app, repository };

@@ -1,36 +1,17 @@
 import { z } from 'zod';
 import { CHANGE_REASONS, EMPLOYEE_STATUSES } from '../../domain/types.js';
+import { enumListParam, idListParam } from '../../http/queryParsers.js';
 import { EMPLOYEE_SORT_FIELDS } from './employee.types.js';
 
-const BAND_POSITIONS = ['BELOW_BAND', 'LOWER_HALF', 'UPPER_HALF', 'ABOVE_BAND'] as const;
-
-/** Query strings arrive as `departmentIds=1,4,9`; split and coerce in one place. */
-const idList = z
-  .string()
-  .optional()
-  .transform((value) =>
-    value
-      ? value
-          .split(',')
-          .map((part) => Number(part.trim()))
-          .filter((id) => Number.isInteger(id) && id > 0)
-      : undefined,
-  );
-
-const enumList = <T extends readonly [string, ...string[]]>(values: T) =>
-  z
-    .string()
-    .optional()
-    .transform((value) => (value ? value.split(',').map((part) => part.trim()) : undefined))
-    .pipe(z.array(z.enum(values)).optional());
+export const BAND_POSITIONS = ['BELOW_BAND', 'LOWER_HALF', 'UPPER_HALF', 'ABOVE_BAND'] as const;
 
 export const employeeQuerySchema = z.object({
   search: z.string().trim().max(120).optional(),
-  departmentIds: idList,
-  countryIds: idList,
-  jobLevelIds: idList,
-  statuses: enumList(EMPLOYEE_STATUSES),
-  bandPositions: enumList(BAND_POSITIONS),
+  departmentIds: idListParam,
+  countryIds: idListParam,
+  jobLevelIds: idListParam,
+  statuses: enumListParam(EMPLOYEE_STATUSES),
+  bandPositions: enumListParam(BAND_POSITIONS),
   page: z.coerce.number().int().min(1).default(1),
   // Capped so a stray `pageSize=100000` cannot ask Postgres for the whole org.
   pageSize: z.coerce.number().int().min(1).max(200).default(25),
