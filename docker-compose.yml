@@ -16,5 +16,22 @@ services:
       timeout: 5s
       retries: 10
 
+  # `docker compose --profile app up --build` runs the whole thing: Postgres, the
+  # migrations, the API and the built UI on one port. Without the profile only the
+  # database starts, which is what local development needs.
+  app:
+    build: .
+    container_name: salary-management-app
+    profiles: ["app"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://salary:salary@db:5432/salary?schema=public
+      PORT: 4000
+      NODE_ENV: production
+    ports:
+      - "${APP_PORT:-4000}:4000"
+
 volumes:
   salary-db-data:

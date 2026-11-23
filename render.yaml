@@ -1,0 +1,21 @@
+# One-click deploy on Render: a managed Postgres plus the single image that serves
+# the API and the built UI. The seed is run once from the service shell:
+#   npx prisma db seed --schema server/prisma/schema.prisma
+services:
+  - type: web
+    name: salary-management
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: salary-management-db
+          property: connectionString
+      - key: PORT
+        value: 4000
+
+databases:
+  - name: salary-management-db
+    databaseName: salary
+    user: salary
