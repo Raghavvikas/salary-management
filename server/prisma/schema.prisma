@@ -128,4 +128,7 @@ model SalaryRecord {
 
   @@index([employeeId, effectiveTo])
   @@index([effectiveFrom])
+  /// Serves the directory and every analytics query: they all read exactly the
+  /// current records (effectiveTo IS NULL) and most of them order by pay.
+  @@index([effectiveTo, amountUsd])
 }
