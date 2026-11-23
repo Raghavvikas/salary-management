@@ -7,6 +7,10 @@ and answer "how do we pay people?" without opening a spreadsheet.
 Built with **React + TypeScript + Ant Design** on the front, **Node + Express +
 Prisma** on the back, and **PostgreSQL** underneath.
 
+**Live: <https://salary-management-bscc.onrender.com>** — running on Render's free
+tier, so the first request after a quiet spell takes about a minute to wake the
+instance.
+
 ---
 
 ## Quick start
